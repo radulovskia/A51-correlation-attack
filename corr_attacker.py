@@ -1,25 +1,35 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 from a51 import A51
-import main
 
-text1 = "radulovski123"
+def string_to_binary(st : str):
+    bits = [bin(ord(i))[2:].zfill(8) for i in st]
+    return ''.join(bits)
+
+def binary_to_string(st : str):
+    n = 8
+    bits = [st[i:i+n] for i in range(0, len(st), n)]
+    return ''.join([chr(int(i, 2)) for i in bits])
+
+def decimal_to_string(arr):
+    return ''.join(str(i) for i in arr)
+
+def string_to_decimal(st: str):
+    return [int(i) for i in list(st)] 
+
 session_key = "0100111000101111010011010111110000011110101110001000101100111010"
-instance1 = A51(session_key)
-plaintext_bits = main.string_to_binary(text1)
-ciphertext = instance1.encrypt(plaintext_bits, len(plaintext_bits))
+sk_arr = string_to_decimal(session_key)
+cipher = A51(sk_arr)
 
-print("Original text:\t\t", text1)
-print("Original keystream:\t", instance1._get_keystream())
-print("Original Plain bits:\t", plaintext_bits)
-print("Original Ciphertext:\t", ciphertext)
-print("\n")
+keystream = ""
 
-known_text = "radul"
-known_keystream_part = instance1._get_keystream()[:20] #20 from 80, 25%
-# keystream will be XOR from plaintext and cipher
-known_plain_bits = main.string_to_binary(known_text)
+known_plaintext = "aleksandar"
+plain_arr = string_to_decimal(string_to_binary(known_plaintext))
+cipher_arr = cipher.encrypt(plain_arr)
+keystream = cipher.keystream
 
-print("Known text:\t\t", known_text)
-print("Known keystream:\t", known_keystream_part)
-print("Known Plain bits:\t", known_plain_bits)
-print("Known Ciphertext:\t", ciphertext)
-print("\n")
+correlation = np.correlate(plain_arr, cipher_arr)
+shift = np.mean(plain_arr)
+recovered_state = np.argmax(correlation) - shift
+print(recovered_state)

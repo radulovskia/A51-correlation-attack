@@ -1,7 +1,7 @@
 class LFSR:
 	
 	def __init__(self,i,length,clockingBit,tappedBits): 
-		self.i,self.length,self.register,self.clockingBit,self.tappedBits = i,length,['0']*length,clockingBit,tappedBits
+		self.i,self.length,self.register,self.clockingBit,self.tappedBits = i,length,[0]*length,clockingBit,tappedBits
 	
 	def _getID(self):	  					return self.i
 	def _getRegister(self): 				return self.register
@@ -18,8 +18,6 @@ class LFSR:
 
 	def __str__(self) -> str:
 		return f"Register ID: {self.i}\nRegister: {self.register}\n"
-
-def xor(x,y): return '0' if x==y else '1'
 
 class A51:
 	def _get_session_key(self):
@@ -42,76 +40,83 @@ class A51:
 			# lfsrX
 			nMsb = bit
 			for i in range(len(self.lfsrX.tappedBits)):
-				nMsb = xor(nMsb, self.lfsrX.register[self.lfsrX.tappedBits[i]])
+				nMsb = nMsb ^ self.lfsrX.register[self.lfsrX.tappedBits[i]]
 			self.lfsrX._setRegister([nMsb]+self.lfsrX._getRegister()[0:self.lfsrX._getLength()-1])
 			# lfsrY
 			nMsb = bit
 			for i in range(len(self.lfsrY.tappedBits)):
-				nMsb = xor(nMsb, self.lfsrY.register[self.lfsrY.tappedBits[i]])
+				nMsb = nMsb ^ self.lfsrY.register[self.lfsrY.tappedBits[i]]
 			self.lfsrY._setRegister([nMsb]+self.lfsrY._getRegister()[0:self.lfsrY._getLength()-1])
 			# lfsrZ
 			nMsb = bit
 			for i in range(len(self.lfsrZ.tappedBits)):
-				nMsb = xor(nMsb, self.lfsrZ.register[self.lfsrZ.tappedBits[i]])
+				nMsb = nMsb ^ self.lfsrZ.register[self.lfsrZ.tappedBits[i]]
 			self.lfsrZ._setRegister([nMsb]+self.lfsrZ._getRegister()[0:self.lfsrZ._getLength()-1])
 
 	# initial state is here
 	# def clock_100(self):
 		for j in range(100):
 			clockingBits = [self.lfsrX._getClockingBit(), self.lfsrY._getClockingBit(), self.lfsrZ._getClockingBit()]
-			oneCount, zeroCount = clockingBits.count('1'), clockingBits.count('0')
-			majorityBit  = '1' if max(oneCount, zeroCount) == oneCount else '0'
+			oneCount, zeroCount = clockingBits.count('1'), clockingBits.count(0)
+			majorityBit  = 1 if max(oneCount, zeroCount) == oneCount else 0
 			# lfsrX #
 			if self.lfsrX._getClockingBit() == majorityBit:
 				nMsb = self.lfsrX.register[self.lfsrX.tappedBits[0]]
 				for i in range(1, len(self.lfsrX.tappedBits)):
-					nMsb = xor(nMsb, self.lfsrX.register[self.lfsrX.tappedBits[i]])
+					nMsb = nMsb ^ self.lfsrX.register[self.lfsrX.tappedBits[i]]
 				self.lfsrX._setRegister([nMsb]+self.lfsrX._getRegister()[0:self.lfsrX._getLength()-1])
 			# lfsrY #
 			if self.lfsrY._getClockingBit() == majorityBit:
 				nMsb = self.lfsrY.register[self.lfsrY.tappedBits[0]]
 				for i in range(1, len(self.lfsrY.tappedBits)):
-					nMsb = xor(nMsb, self.lfsrY.register[self.lfsrY.tappedBits[i]])
+					nMsb = nMsb ^ self.lfsrY.register[self.lfsrY.tappedBits[i]]
 				self.lfsrY._setRegister([nMsb]+self.lfsrY._getRegister()[0:self.lfsrY._getLength()-1])
 			# lfsrZ #
 			if self.lfsrZ._getClockingBit() == majorityBit:
 				nMsb = self.lfsrZ.register[self.lfsrZ.tappedBits[0]]
 				for i in range(1, len(self.lfsrZ.tappedBits)):
-					nMsb = xor(nMsb, self.lfsrZ.register[self.lfsrZ.tappedBits[i]])
+					nMsb = nMsb ^ self.lfsrZ.register[self.lfsrZ.tappedBits[i]]
 				self.lfsrZ._setRegister([nMsb]+self.lfsrZ._getRegister()[0:self.lfsrZ._getLength()-1])
-	
-	def generate_keystream(self,x):		
-		self.keystream=""
+	# warm-up phase is here
+	# originally 228 bits of keystream are generated
+	def generate_keystream(self, x):		
+		self.keystream = []
 		for j in range(x):
 			clockingBits = [self.lfsrX._getClockingBit(), self.lfsrY._getClockingBit(), self.lfsrZ._getClockingBit()]
-			oneCount,zeroCount = clockingBits.count('1'),clockingBits.count('0')
-			majorityBit  = '1' if max(oneCount,zeroCount)==oneCount else '0'
+			oneCount,zeroCount = clockingBits.count('1'),clockingBits.count(0)
+			majorityBit  = 1 if max(oneCount,zeroCount)==oneCount else 0
 			# lfsrX #
 			if self.lfsrX._getClockingBit() == majorityBit:
 				nMsb = self.lfsrX.register[self.lfsrX.tappedBits[0]]
 				for i in range(1, len(self.lfsrX.tappedBits)):
-					nMsb = xor(nMsb, self.lfsrX.register[self.lfsrX.tappedBits[i]])
+					nMsb = nMsb ^ self.lfsrX.register[self.lfsrX.tappedBits[i]]
 				self.lfsrX._setRegister([nMsb]+self.lfsrX._getRegister()[0:self.lfsrX._getLength()-1])	
 			# lfsrY #
 			if self.lfsrY._getClockingBit() == majorityBit:
 				nMsb = self.lfsrY.register[self.lfsrY.tappedBits[0]]
 				for i in range(1, len(self.lfsrY.tappedBits)):
-					nMsb = xor(nMsb, self.lfsrY.register[self.lfsrY.tappedBits[i]])
+					nMsb = nMsb ^ self.lfsrY.register[self.lfsrY.tappedBits[i]]
 				self.lfsrY._setRegister([nMsb]+self.lfsrY._getRegister()[0:self.lfsrY._getLength()-1])
 			# lfsrZ #
 			if self.lfsrZ._getClockingBit() == majorityBit:
 				nMsb = self.lfsrZ.register[self.lfsrZ.tappedBits[0]]
 				for i in range(1, len(self.lfsrZ.tappedBits)):
-					nMsb = xor(nMsb, self.lfsrZ.register[self.lfsrZ.tappedBits[i]])
+					nMsb = nMsb ^ self.lfsrZ.register[self.lfsrZ.tappedBits[i]]
 				self.lfsrZ._setRegister([nMsb]+self.lfsrZ._getRegister()[0:self.lfsrZ._getLength()-1])
-			self.keystream += xor(xor(self.lfsrX._getBit(self.lfsrX._getLength()-1), 
-				     self.lfsrY._getBit(self.lfsrY._getLength()-1)), self.lfsrZ._getBit(self.lfsrZ._getLength()-1))
+			self.keystream.append(self.lfsrX._getBit(self.lfsrX._getLength()-1) ^ self.lfsrY._getBit(self.lfsrY._getLength()-1) ^ self.lfsrZ._getBit(self.lfsrZ._getLength()-1))
+		return self.keystream
 
-	def encrypt(self, plainText, length):
+	def encrypt(self, plainText):
 		# self.clock_SK()
 		# self.clock_100()
-		self.generate_keystream(length)
-		return "".join([str(xor(self.keystream[i], plainText[i])) for i in range(len(plainText))])
+		self.generate_keystream(len(plainText))
+		res = []
+		for i in range(len(plainText)):
+			res.append(self.keystream[i] ^ plainText[i])
+		return res
 	
 	def decrypt(self, cipherText):
-		return "".join([str(xor(self.keystream[i], cipherText[i])) for i in range(len(cipherText))])
+		res = []
+		for i in range(len(cipherText)):
+			res.append(self.keystream[i] ^ cipherText[i])
+		return res
