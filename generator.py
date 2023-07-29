@@ -6,10 +6,10 @@ import argparse
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Dataset Generator")
-    parser.add_argument("-o", "--output", type=str, default="output", help="Output folder path")
-    parser.add_argument("-l", "--length", type=int, default="length", help="Length of strings")
-    parser.add_argument("-s", "--size", type=int, default="size", help="Size of dataset")
-    parser.add_argument("-n", "--name", type=str, default="name", help="Name of dataset")
+    parser.add_argument("-o", "--output", type=str, default= "output", help="Output folder path")
+    parser.add_argument("-l", "--length", type=int, default= 2, help="Length of strings")
+    parser.add_argument("-s", "--size", type=int, default= 5, help="Size of dataset")
+    parser.add_argument("-n", "--name", type=str, default= "test_dataset", help="Name of dataset")
     return parser.parse_args()
 
 def string_to_binary(st : str):
@@ -29,14 +29,13 @@ def get_random_string(length):
 def main() -> None:
     args = parse_args()
     output_path : str = args.output
+    ds_name : str = args.name
     string_length : int = args.length
     ds_size : int = args.size
-    ds_name : str = args.name
+
+    session_key = string_to_decimal(string_to_binary(get_random_string(8)))
 
     plain_strings = []
-    rand_string = get_random_string(string_length)
-    rand_string = string_to_binary(rand_string)
-    session_key = string_to_decimal(rand_string)
     for i in range(ds_size):
         plain_strings.append(string_to_decimal(string_to_binary(get_random_string(string_length))))
 
